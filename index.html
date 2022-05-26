@@ -13,22 +13,42 @@
 <body>
     <div class="header">
         <div class="title">Tic Tac Toe</div>
-        <div id="display" class="display">Let the game begin... </div>
+        <div id="display" class="display blink">Good luck!</div>
         <p class="madeby">Made by Much_App <a class="githubLogo" href="https://github.com/Much-App"><img src="githubLogo.svg" alt="github logo" height="20" width="auto">  </a></p>
     </div>
     <div class="main">
         <div id="menu" class="buttons">
             <button id="newGameBtn">NEW GAME</button>
-            <button id="restartBtn">RESET</button>
+            <button id="resetBtn">RESET</button>
             <button id="soundBtn">SOUND</button>
-            
         </div>
-        <div id='board' class="game">
-        <div id="players"></div>
+        <div id='board' class="game"> </div>
+    <div id="players" class="player-display">
+            <div class="thead">Name</div>
+            <div class="thead">Symbol</div>
+            <div class="thead">Wins</div>
+            <div id="p1name"></div>
+            <div id="p1symbol"></div>
+            <div id="p1wins"></div>
+            <div id="p2name"></div>
+            <div id="p2symbol"></div>
+            <div id="p2wins"></div>
+             
         </div>
+    
 
     </div>
-    <div class="popUpMenu">
+    <div class="popUpMenu" id="popUpMenu">
+        <div id="popUpDisplay">Choose Game Mode</div>
+        
+        <button id="versusBtn">vs Player</button>
+            
+        <form id="form" class="popupInputs">
+            <input type="text" placeholder="Add Player 1" id="p1Input">
+            <input type="text" placeholder="Add Player 2" id="p2Input">
+        </form>
+
+        <button id="startGameBtn">START</button>
 
     </div>
     <script src="script.js"></script>

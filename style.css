@@ -43,6 +43,15 @@ body {
 }
 .display {
 	font-size: calc(8px + 1.5vw + 1.5vh);
+	
+}
+.blink {
+	animation: blinker 1.5s linear 5;
+}
+@keyframes blinker {
+	50% {
+		opacity: 0;
+	}
 }
 .hide {
 	transform: scale(0);
@@ -50,7 +59,7 @@ body {
 .main {
 	grid-area: main;
 	display: grid;
-	grid-template-columns: 26vw 48vw 26vw;
+	grid-template-columns: 20vw 48vw 32vw;
 	grid-template-areas: "menu board players";
 	
 }
@@ -90,8 +99,76 @@ button {
 	align-items: center;
 	gap: 30px;
 }
-
-
+.popUpMenu {
+	z-index: 0;
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	background-color: black;
+	display: flex;
+	flex-flow: column nowrap;	
+	padding: 3vw;
+	border-radius: 20px;
+	gap: 1vw;
+	justify-content: space-evenly;
+	align-items: center;
+}
+#popUpDisplay{
+	color: white;
+	font-family: var(--open-sans);
+	font-size: 5vw;
+}
+.popUpMenu>div>button, .popUpMenu>button{
+	border-radius: 15px;
+	min-height: 5vh;
+	width: 15vw;
+	height: auto;
+	color: white;
+	background-color: rgba(0, 0, 0, 0);
+	border-color: white;
+	padding: 10px;
+	margin: 0 2vw 0 2vw;
+}
+input {
+	width: 25vw;
+	height: 2.5vw;
+	font-size: 1.3vw;
+	text-align: center;
+	border-radius: 5px;
+}
+.popupInputs {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+}
+.player-display {
+	display: grid;
+	grid-template: 3vw 3vw 3vw/ 1fr 1fr 1fr;
+	gap: 3px 3px;
+	padding: 1vw;
+	margin: 1vw;
+	justify-content: center;
+	align-items: center;
+	height: max-content;
+	align-self: center;
+}
+.player-display>div {
+	font-family: var(--roboto);
+	font-size: 1.8vw;
+	justify-content: center;
+	text-align: center;
+	padding: 3px;
+}
+.thead{
+	background-color: lightgrey;
+	font-size: 1.9vw;
+}
+ .highlight {
+	 background-color: lightcoral;
+	 transform: scale(1.2) 2s;
+ }
+ 
+ 
 
 /* CSS RESET */
 html, body, div, span, applet, object, iframe,
