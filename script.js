@@ -59,10 +59,12 @@ const board = function(){
             
         }
         checkWinCondtion();
+        game.highlightTurn();
+
     }
     function addPlay (str,index){
         if (gameState[index] == 'nil') {
-            return
+            return false
         }
         gameState[index] = str;
         update();
@@ -70,7 +72,6 @@ const board = function(){
     }
     function checkWinCondtion(){
             for (let i = 0; i < 3; i++){
-
                 if ((gameState[0] == 'x' && gameState[0] === gameState[1] && gameState[1] === gameState[2])
                     || (gameState[3] == 'x' && gameState[3] === gameState[4] && gameState[4] === gameState[5])
                     || (gameState[6] == 'x' && gameState[6] === gameState[7] && gameState[7] === gameState[8])
@@ -80,11 +81,7 @@ const board = function(){
                     || (gameState[2] == 'x' && gameState[2] === gameState[5] && gameState[5] === gameState[8])
                     || (gameState[0] == 'x' && gameState[0] === gameState[4] && gameState[4] === gameState[8])
                     || (gameState[2] == 'x' && gameState[2] === gameState[4] && gameState[4] === gameState[6])) {
-                        gameState.forEach((str,ind) => {
-                            if (str == '') {
-                                gameState[ind] = 'nil'
-                            }
-                        })
+                        gameState.forEach((str,ind) => {gameState[ind] = 'nil'})
                         return game.gameOver('x')
                     } else if ((gameState[0] == 'x' && gameState[0] === gameState[1] && gameState[1] === gameState[2])
                     || (gameState[3] == 'o' && gameState[3] === gameState[4] && gameState[4] === gameState[5])
@@ -95,19 +92,12 @@ const board = function(){
                     || (gameState[2] == 'o' && gameState[2] === gameState[5] && gameState[5] === gameState[8])
                     || (gameState[0] == 'o' && gameState[0] === gameState[4] && gameState[4] === gameState[8])
                     || (gameState[2] == 'o' && gameState[2] === gameState[4] && gameState[4] === gameState[6])) {
-                        gameState.forEach((str,ind) => {
-                            if (str == '') {
-                                gameState[ind] = 'nil'
-                            }
-                        })
+                        
+                        gameState.forEach((str,ind) => {gameState[ind] = 'nil'})
                         return game.gameOver('o')
                     } else if (gameState.find(str=>str == '') == undefined) {
-                        gameState.forEach((str,ind) => {
-                            if (str == '') {
-                                gameState[ind] = 'nil'
-                            }
-                        })
-                        game.gameOver('tie')
+                        gameState.forEach((str,ind) => {gameState[ind] = 'nil'})
+                        return game.gameOver('tie')
                     }
 
 
@@ -115,20 +105,17 @@ const board = function(){
             }
     function reset(){
         gameState.forEach((ele,ind) => {gameState[ind]=''})
+        display.header('New Round','Good Luck!',1.2)
         update();
-        
-        
     }
-    function log(){
-        console.log(gameState);
-    }
-    return {update,addPlay,reset,log}
+    return {update,addPlay,reset}
 }()
 
 const game = function(){
     let gameMode = 'pvp';
     let turn = ''; 
-    const changeturn = function (){
+    const changeturn = function (str){
+
         if (turn === players[1].name){turn = players[0].name } 
             else {turn = players[1].name}
     }
@@ -144,8 +131,10 @@ const game = function(){
             choice = 'x'} else if (turn == players[1].name){
                 choice = 'o'                
             }} 
-        board.addPlay(choice,index)
+        if (board.addPlay(choice,index) == false){return}
         changeturn()
+        board.addPlay(choice,index)
+        
         }
     function changeGameMode(){
         if (this.textContent == 'vs Player'){
@@ -205,10 +194,10 @@ const game = function(){
         board.reset();
     }
     function highlightTurn (){
-        if (p1name == turn){
+        if (p1name.textContent == turn){
             p1name.classList.add('highlight');
             p2name.classList.remove('highlight');
-        } else if (p2name == turn) {
+        } else if (p2name.textContent == turn) {
             p2name.classList.add('highlight');
             p1name.classList.remove('highlight');
         }
@@ -223,12 +212,44 @@ function newPlayer (name){
         return players.push({name:name, wins:0, symbol:'o', player:2})
     }
 }
-function togglePopup() {
+function toggleNewGame() {
     popUp.classList.toggle('hide');
     players = []
 }
 
     versusBtn.addEventListener('click',game.changeGameMode);
     startBtn.addEventListener('click', game.startGame);
-    newGameBtn.addEventListener('click',togglePopup);
+    newGameBtn.addEventListener('click',toggleNewGame
+);
     resetBtn.addEventListener('click', board.reset);
+
+    /* while testing */
+    p1input.value = 'p1';
+    p2input.value = 'p2';
+    game.startGame();
+
+
+    /*
+    position = board state
+    depth = how far the algorithm will analyze
+    maximizingPlayer = whose decision is it (boolean value) 
+    alpha = stores highest value for pruning
+    beta = stores value for pruning */
+
+    /* this should run only if there is one possible move
+function staticEval (pos,maxiPlayer){
+
+    let choice =''
+    if(maxiPlayer == true){
+        choice='x' 
+    } else {choice ='0'}
+    let virtualBoard = gameState;
+    virtualBoard.forEach((ele,ind,arr)=>{
+        if (ele == ''){
+            arr[ind] = choice;
+        }
+    }
+
+}
+
+*/
