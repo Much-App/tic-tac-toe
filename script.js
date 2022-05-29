@@ -40,125 +40,89 @@ const display = function(){
 return {scoreboard,header}
 }()
 
-const board = function(){
-    let gameState = ['','','','','','','','','']
-    const update = function (){
+const board = function(){   
+    const update = function (arr){
         while (boardElement.firstChild) {
             boardElement.removeChild(boardElement.lastChild);
           }
-        for (let i = 0; i < gameState.length; i++) {
+        for (let i = 0; i < arr.length; i++) {
             let square = document.createElement('div');
             square.classList.add('square');
-            if (gameState[i] !== '') {
-                square.classList.add(`${gameState[i]}`)}
+            if (arr[i] !== '') {
+                square.classList.add(`${arr[i]}`)}
             square.setAttribute('data-index',`${i}`);
-            square.setAttribute('data-xoxo',`${gameState[i]}`)
+            square.setAttribute('data-xoxo',`${arr[i]}`)
 
             boardElement.appendChild(square);
-            square.addEventListener('click',game.playerTurn)
+            square.addEventListener('click',game.playerDecision)
             
         }
-        checkWinCondtion();
-        game.highlightTurn();
+        board.highlightTurn();
 
     }
-    function addPlay (str,index){
-        if (gameState[index] == 'nil') {
-            return false
+    const highlightTurn = function (str){
+        if (str == 'p1'){
+            p1name.classList.add('highlight');
+            p2name.classList.remove('highlight');
+        } else if (str == 'p2') {
+            p2name.classList.add('highlight');
+            p1name.classList.remove('highlight');
         }
-        gameState[index] = str;
-        update();
-        
     }
-    function checkWinCondtion(){
-            for (let i = 0; i < 3; i++){
-                if ((gameState[0] == 'x' && gameState[0] === gameState[1] && gameState[1] === gameState[2])
-                    || (gameState[3] == 'x' && gameState[3] === gameState[4] && gameState[4] === gameState[5])
-                    || (gameState[6] == 'x' && gameState[6] === gameState[7] && gameState[7] === gameState[8])
-                    || (gameState[0] == 'x' && gameState[0] === gameState[3] && gameState[3] === gameState[6])
-                    || (gameState[1] == 'x' && gameState[1] === gameState[4] && gameState[4] === gameState[7])
-                    || (gameState[2] == 'x' && gameState[2] === gameState[5] && gameState[5] === gameState[8])
-                    || (gameState[2] == 'x' && gameState[2] === gameState[5] && gameState[5] === gameState[8])
-                    || (gameState[0] == 'x' && gameState[0] === gameState[4] && gameState[4] === gameState[8])
-                    || (gameState[2] == 'x' && gameState[2] === gameState[4] && gameState[4] === gameState[6])) {
-                        gameState.forEach((str,ind) => {gameState[ind] = 'nil'})
-                        return game.gameOver('x')
-                    } else if ((gameState[0] == 'x' && gameState[0] === gameState[1] && gameState[1] === gameState[2])
-                    || (gameState[3] == 'o' && gameState[3] === gameState[4] && gameState[4] === gameState[5])
-                    || (gameState[6] == 'o' && gameState[6] === gameState[7] && gameState[7] === gameState[8])
-                    || (gameState[0] == 'o' && gameState[0] === gameState[3] && gameState[3] === gameState[6])
-                    || (gameState[1] == 'o' && gameState[1] === gameState[4] && gameState[4] === gameState[7])
-                    || (gameState[2] == 'o' && gameState[2] === gameState[5] && gameState[5] === gameState[8])
-                    || (gameState[2] == 'o' && gameState[2] === gameState[5] && gameState[5] === gameState[8])
-                    || (gameState[0] == 'o' && gameState[0] === gameState[4] && gameState[4] === gameState[8])
-                    || (gameState[2] == 'o' && gameState[2] === gameState[4] && gameState[4] === gameState[6])) {
-                        
-                        gameState.forEach((str,ind) => {gameState[ind] = 'nil'})
-                        return game.gameOver('o')
-                    } else if (gameState.find(str=>str == '') == undefined) {
-                        gameState.forEach((str,ind) => {gameState[ind] = 'nil'})
-                        return game.gameOver('tie')
-                    }
-
-
-                }
-            }
-    function reset(){
-        gameState.forEach((ele,ind) => {gameState[ind]=''})
-        display.header('New Round','Good Luck!',1.2)
-        update();
-    }
-    return {update,addPlay,reset}
-}()
-
-const game = function(){
-    let gameMode = 'pvp';
-    let turn = ''; 
-    const changeturn = function (str){
-
-        if (turn === players[1].name){turn = players[0].name } 
-            else {turn = players[1].name}
-    }
-    const playerTurn = function() {
-        if (this.dataset.xoxo !== '') {
-            return
-        } ;
-        let tag = this.dataset.square;
-        let index = this.dataset.index;
-        let choice = '';
-        if (gameMode == 'pvp'){
-        if (turn == players[0].name) {
-            choice = 'x'} else if (turn == players[1].name){
-                choice = 'o'                
-            }} 
-        if (board.addPlay(choice,index) == false){return}
-        changeturn()
-        board.addPlay(choice,index)
-        
-        }
-    function changeGameMode(){
+    const changeModeBtn = function(){
         if (this.textContent == 'vs Player'){
             p2input.classList.add('hide');
             p2input.value = '';   
-            gameMode = 'pvc';
             this.textContent = 'vs Computer'
             return
             }
         if (this.textContent == 'vs Computer') {
             p2input.classList.remove('hide');
-            gameMode = 'pvp'
             return this.textContent = 'vs Player'};
+    }
+    return {update, highlightTurn, changeModeBtn}
+}()
+
+const game = function(){
+    let gameState = ['','','','','','','','',''];
+    let mode = 'pvp';
+    let currentTurn = '';
+    const changeTurn = function (){
+        if (currentTurn === 'p1'){currentTurn = 'p2' } 
+            else {currentTurn = 'p1'}
+    }
+    const playerDecision = function() {
+        if (this.dataset.xoxo !== '') {
+            return
         }
-    function gameOver(str){
+        let index = this.dataset.index;
+        let choice = '';
+        if (mode == 'vs Player'){
+            if (currentTurn == 'p1') {
+                choice = 'x'
+            } else if (currentTurn == 'p2'){
+                    choice = 'o'            
+            }}
+        changeTurn()
+
+        if (gameState[index] == 'nil') {
+            return
+        }
+        gameState[index] = choice;
+        board.update(gameState);    
+        board.highlightTurn(currentTurn);
+        checkWinCondtion();
+    }
+    const gameOver = function(str){
         if (str == 'x'){
-            display.header('Xs Win!');
+            display.header('Xs Win!','Press Reset for new round',3);
             players.forEach((str,index)=>{
                 if (str.symbol == 'x') {
                     players[index].wins++
                 }
             })
         } else if (str == 'o') {
-            display.header('Os Win!') ;
+            display.header('Os Win!','Press Reset for new round',3) ;
             players.forEach((str,index)=>{
                 if (str.symbol == 'o') {
                     players[index].wins++
@@ -170,39 +134,78 @@ const game = function(){
     
         display.scoreboard()
     }
-    function startGame () {
+    const startGame =function () {
         players.length = 0; 
+        reset();
         if (p1input.value == '') {
-            return alert('Please enter player name')
-        } else if ((p2input.classList.contains('hide') == false) && p2input.value == '') {
-            return alert('Please enter player name')
+            return alert('Please enter player 1 name')
+        } 
+        if ((p2input.classList.contains('hide') == false) && p2input.value == '') {
+            return alert('Please enter player 2 name')
         }
-        if (gameMode == 'pvc') {
-            p2input.value = 'TicTacToerminator'
+        if (p1input.value == p2input.value) {
+            if (confirm("Use same name for both players?") == false) {
+                return}
         }
-        popUp.classList.toggle('hide');
         
+        popUp.classList.toggle('hide');
+
         const p1name = p1input.value;
         const p2name = p2input.value;
         newPlayer(p1name);
         if (p2input.value !== '') {
             newPlayer(p2name)
         }
-        turn = players[0].name;
-        const form = document.querySelector('#form').reset();
+        game.settings('p1',versusBtn.textContent)
         display.scoreboard();
-        board.reset();
+        const form = document.querySelector('#form').reset();
     }
-    function highlightTurn (){
-        if (p1name.textContent == turn){
-            p1name.classList.add('highlight');
-            p2name.classList.remove('highlight');
-        } else if (p2name.textContent == turn) {
-            p2name.classList.add('highlight');
-            p1name.classList.remove('highlight');
+    const settings = function (t,m,state){
+        currentTurn = t;
+        mode = m;
+        if (state == 'reset'){
+            gameState = ['','','','','','','','',''];
         }
     }
-    return {playerTurn, startGame, changeGameMode, gameOver, highlightTurn}
+    function reset(){
+        gameState = ['','','','','','','','',''];
+        display.header('New Round','Good Luck!',1.2)
+        board.update(gameState);
+    }
+    function checkWinCondtion(){
+        for (let i = 0; i < 3; i++){
+            if ((gameState[0] == 'x' && gameState[0] === gameState[1] && gameState[1] === gameState[2])
+                || (gameState[3] == 'x' && gameState[3] === gameState[4] && gameState[4] === gameState[5])
+                || (gameState[6] == 'x' && gameState[6] === gameState[7] && gameState[7] === gameState[8])
+                || (gameState[0] == 'x' && gameState[0] === gameState[3] && gameState[3] === gameState[6])
+                || (gameState[1] == 'x' && gameState[1] === gameState[4] && gameState[4] === gameState[7])
+                || (gameState[2] == 'x' && gameState[2] === gameState[5] && gameState[5] === gameState[8])
+                || (gameState[2] == 'x' && gameState[2] === gameState[5] && gameState[5] === gameState[8])
+                || (gameState[0] == 'x' && gameState[0] === gameState[4] && gameState[4] === gameState[8])
+                || (gameState[2] == 'x' && gameState[2] === gameState[4] && gameState[4] === gameState[6])) {
+                    gameState.forEach((str,ind) => {gameState[ind] = 'nil'})
+                    return gameOver('x')
+                } else if ((gameState[0] == 'x' && gameState[0] === gameState[1] && gameState[1] === gameState[2])
+                || (gameState[3] == 'o' && gameState[3] === gameState[4] && gameState[4] === gameState[5])
+                || (gameState[6] == 'o' && gameState[6] === gameState[7] && gameState[7] === gameState[8])
+                || (gameState[0] == 'o' && gameState[0] === gameState[3] && gameState[3] === gameState[6])
+                || (gameState[1] == 'o' && gameState[1] === gameState[4] && gameState[4] === gameState[7])
+                || (gameState[2] == 'o' && gameState[2] === gameState[5] && gameState[5] === gameState[8])
+                || (gameState[2] == 'o' && gameState[2] === gameState[5] && gameState[5] === gameState[8])
+                || (gameState[0] == 'o' && gameState[0] === gameState[4] && gameState[4] === gameState[8])
+                || (gameState[2] == 'o' && gameState[2] === gameState[4] && gameState[4] === gameState[6])) {
+                    
+                    gameState.forEach((str,ind) => {gameState[ind] = 'nil'})
+                    return gameOver('o')
+                } else if (gameState.find(str=>str == '') == undefined) {
+                    gameState.forEach((str,ind) => {gameState[ind] = 'nil'})
+                    return gameOver('tie')
+                }
+
+
+            }
+    }
+    return {playerDecision, startGame, settings, gameOver, reset}
 }()
 
 function newPlayer (name){
@@ -217,17 +220,16 @@ function toggleNewGame() {
     players = []
 }
 
-    versusBtn.addEventListener('click',game.changeGameMode);
+    versusBtn.addEventListener('click',board.changeModeBtn);
     startBtn.addEventListener('click', game.startGame);
-    newGameBtn.addEventListener('click',toggleNewGame
-);
-    resetBtn.addEventListener('click', board.reset);
+    newGameBtn.addEventListener('click',toggleNewGame);
+    resetBtn.addEventListener('click', game.reset);
 
     /* while testing */
     p1input.value = 'p1';
     p2input.value = 'p2';
     game.startGame();
-
+    /**/
 
     /*
     position = board state
