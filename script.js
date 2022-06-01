@@ -92,44 +92,51 @@ const game = function(){
             else {currentTurn = 'p1'}
     }
     const playerDecision = function() {
-        if (this.dataset.xoxo !== '') {
-            return
-        }
+        if (this.dataset.xoxo !== '') {return}
         let index = this.dataset.index;
         let choice = '';
         if (mode == 'vs Player'){
             if (currentTurn == 'p1') {
                 choice = 'x'
             } else if (currentTurn == 'p2'){
-                    choice = 'o'            
-            }}
-        changeTurn()
-
+                choice = 'o'            
+            }
         if (gameState[index] == 'nil') {
             return
         }
-        gameState[index] = choice;
+        gameState[index] = choice
+    } else if (mode = 'vs Computer') {
+        aiDecision()
+    }
+
+        changeTurn()
         board.update(gameState);    
         board.highlightTurn(currentTurn);
-        checkWinCondtion();
+        if (checkWinCondtion() == 1){
+            gameOver('x')
+        } else if (checkWinCondtion() == -1){
+            gameOver('o')
+        } else if (checkWinCondtion() == 0){
+            gameOver('tie')}
     }
     const gameOver = function(str){
+        gameState.forEach((str,ind) => {gameState[ind] = 'nil'})
         if (str == 'x'){
-            display.header('Xs Win!','Press Reset for new round',3);
+            display.header('Xs Win!','Press Reset for new round',1.2);
             players.forEach((str,index)=>{
                 if (str.symbol == 'x') {
                     players[index].wins++
                 }
             })
         } else if (str == 'o') {
-            display.header('Os Win!','Press Reset for new round',3) ;
+            display.header('Os Win!','Press Reset for new round',1.2) ;
             players.forEach((str,index)=>{
                 if (str.symbol == 'o') {
                     players[index].wins++
                 }
             })
         } else if (str == 'tie') {
-            display.header('It\'s a... tie?','Hit reset for another round',8);
+            display.header('It\'s a... tie?','Hit reset for another round',1.2);
         }
     
         display.scoreboard()
@@ -183,8 +190,7 @@ const game = function(){
                 || (gameState[2] == 'x' && gameState[2] === gameState[5] && gameState[5] === gameState[8])
                 || (gameState[0] == 'x' && gameState[0] === gameState[4] && gameState[4] === gameState[8])
                 || (gameState[2] == 'x' && gameState[2] === gameState[4] && gameState[4] === gameState[6])) {
-                    gameState.forEach((str,ind) => {gameState[ind] = 'nil'})
-                    return gameOver('x')
+                    return 1
                 } else if ((gameState[0] == 'x' && gameState[0] === gameState[1] && gameState[1] === gameState[2])
                 || (gameState[3] == 'o' && gameState[3] === gameState[4] && gameState[4] === gameState[5])
                 || (gameState[6] == 'o' && gameState[6] === gameState[7] && gameState[7] === gameState[8])
@@ -194,18 +200,166 @@ const game = function(){
                 || (gameState[2] == 'o' && gameState[2] === gameState[5] && gameState[5] === gameState[8])
                 || (gameState[0] == 'o' && gameState[0] === gameState[4] && gameState[4] === gameState[8])
                 || (gameState[2] == 'o' && gameState[2] === gameState[4] && gameState[4] === gameState[6])) {
-                    
-                    gameState.forEach((str,ind) => {gameState[ind] = 'nil'})
-                    return gameOver('o')
+                    return -1
                 } else if (gameState.find(str=>str == '') == undefined) {
-                    gameState.forEach((str,ind) => {gameState[ind] = 'nil'})
-                    return gameOver('tie')
+                    return 0
                 }
-
-
             }
     }
-    return {playerDecision, startGame, settings, gameOver, reset}
+    const aiDecision = function(){
+        let index = 0;
+        let choice = 'o';
+        for (let i =0; i<9;i++){
+            if (gameState[i] == ''){
+                let virtualBoard = gameState;
+                virtualBoard[i] = 'o';
+                if (minimax(virtualBoard,5,false) == 1){
+                    index = i;
+                    break
+                }
+            }
+        }
+    }
+    function staticEval (pos){
+        let position = pos;
+        if ((position[0] == 'x' && position[0] === position[1] && position[1] === position[2])
+                    || (position[3] == 'x' && position[3] === position[4] && position[4] === position[5])
+                    || (position[6] == 'x' && position[6] === position[7] && position[7] === position[8])
+                    || (position[0] == 'x' && position[0] === position[3] && position[3] === position[6])
+                    || (position[1] == 'x' && position[1] === position[4] && position[4] === position[7])
+                    || (position[2] == 'x' && position[2] === position[5] && position[5] === position[8])
+                    || (position[2] == 'x' && position[2] === position[5] && position[5] === position[8])
+                    || (position[0] == 'x' && position[0] === position[4] && position[4] === position[8])
+                    || (position[2] == 'x' && position[2] === position[4] && position[4] === position[6])) {
+                        return -1
+            } else if ((position[0] == 'x' && position[0] === position[1] && position[1] === position[2])
+                    || (position[3] == 'o' && position[3] === position[4] && position[4] === position[5])
+                    || (position[6] == 'o' && position[6] === position[7] && position[7] === position[8])
+                    || (position[0] == 'o' && position[0] === position[3] && position[3] === position[6])
+                    || (position[1] == 'o' && position[1] === position[4] && position[4] === position[7])
+                    || (position[2] == 'o' && position[2] === position[5] && position[5] === position[8])
+                    || (position[2] == 'o' && position[2] === position[5] && position[5] === position[8])
+                    || (position[0] == 'o' && position[0] === position[4] && position[4] === position[8])
+                    || (position[2] == 'o' && position[2] === position[4] && position[4] === position[6])){
+                        return 1
+                    
+            } else if (position.find(str=>str == '') == undefined) {
+                return 0}
+    }
+    function minimax(pos, depth, maxiPlayer){
+        if (depth == 0 || staticEval(pos) !== undefined) {
+            console.log(staticEval(pos));
+            return staticEval(pos)
+        }
+        let position = pos;
+        if (maxiPlayer == true){
+            let maxEval = -Infinity;
+            for (let i = 0; i < 9; i++){
+                if(position[i] == ''){
+                    let array1 = position
+                    array1[i] = 'o'
+                    let eval = minimax(array1, depth-1, false)
+                    maxEval = Math.max(eval,maxEval);
+                    return maxEval
+                }
+            }
+        } else {
+            let minEval = Infinity;
+            for (let i = 0; i < 9; i++){
+                if(position[i] == ''){
+                    let array1 = position;
+                    array1[i] = 'o';
+                    let eval = minimax(array1, depth-1, false)
+                    maxEval = Math.max(eval,maxEval);
+                    return maxEval
+                }
+            
+                }
+        }
+    }
+    return {playerDecision, startGame, settings, gameOver, reset,}
+}()
+
+const ai = function (){
+
+    const aiDecision = function(board){
+        let wins = [];
+        let draws = [];
+        for (let i = 0; i < 9; i++){
+            if (board[i] == ''){
+                let virtualBoardA = board;
+                virtualBoardA[i] = 'o';
+                if (minimax(virtualBoardA,5,false) == 1){
+                    wins[wins.length] = i;   
+                }
+                if (minimax(virtualBoardA,5,false) == 0){
+                    draws[draws.length] = i;   
+                }
+            }
+        }
+        let decision = wins[Math.floor(Math.random() * wins.length)];
+        if (wins.length = 0) {
+            decision = draws[Math.floor(Math.random() * draws.length)]
+        }
+        return decision
+    }
+    function staticEval (pos){
+        let position = pos;
+        if ((position[0] == 'x' && position[0] === position[1] && position[1] === position[2])
+                    || (position[3] == 'x' && position[3] === position[4] && position[4] === position[5])
+                    || (position[6] == 'x' && position[6] === position[7] && position[7] === position[8])
+                    || (position[0] == 'x' && position[0] === position[3] && position[3] === position[6])
+                    || (position[1] == 'x' && position[1] === position[4] && position[4] === position[7])
+                    || (position[2] == 'x' && position[2] === position[5] && position[5] === position[8])
+                    || (position[2] == 'x' && position[2] === position[5] && position[5] === position[8])
+                    || (position[0] == 'x' && position[0] === position[4] && position[4] === position[8])
+                    || (position[2] == 'x' && position[2] === position[4] && position[4] === position[6])) {
+                        return -1
+            } else if ((position[0] == 'x' && position[0] === position[1] && position[1] === position[2])
+                    || (position[3] == 'o' && position[3] === position[4] && position[4] === position[5])
+                    || (position[6] == 'o' && position[6] === position[7] && position[7] === position[8])
+                    || (position[0] == 'o' && position[0] === position[3] && position[3] === position[6])
+                    || (position[1] == 'o' && position[1] === position[4] && position[4] === position[7])
+                    || (position[2] == 'o' && position[2] === position[5] && position[5] === position[8])
+                    || (position[2] == 'o' && position[2] === position[5] && position[5] === position[8])
+                    || (position[0] == 'o' && position[0] === position[4] && position[4] === position[8])
+                    || (position[2] == 'o' && position[2] === position[4] && position[4] === position[6])){
+                        return 1
+                    
+            } else if (position.find(str=>str == '') == undefined) {
+                return 0}
+    }
+    function minimax(pos, depth, maxiPlayer){
+        if (depth == 0 || staticEval(pos) !== undefined) {
+            console.log(staticEval(pos));
+            return staticEval(pos)
+        }
+        let position = pos;
+        if (maxiPlayer == true){
+            let maxEval = -Infinity;
+            for (let i = 0; i < 9; i++){
+                if(position[i] == ''){
+                    let array1 = position
+                    array1[i] = 'o'
+                    let eval = minimax(array1, depth-1, false)
+                    maxEval = Math.max(eval,maxEval);
+                    return maxEval
+                }
+            }
+        } else {
+            let minEval = Infinity;
+            for (let i = 0; i < 9; i++){
+                if(position[i] == ''){
+                    let array1 = position;
+                    array1[i] = 'o';
+                    let eval = minimax(array1, depth-1, false)
+                    maxEval = Math.max(eval,maxEval);
+                    return maxEval
+                }
+            
+                }
+        }
+    }
 }()
 
 function newPlayer (name){
@@ -215,6 +369,7 @@ function newPlayer (name){
         return players.push({name:name, wins:0, symbol:'o', player:2})
     }
 }
+
 function toggleNewGame() {
     popUp.classList.toggle('hide');
     players = []
@@ -238,20 +393,61 @@ function toggleNewGame() {
     alpha = stores highest value for pruning
     beta = stores value for pruning */
 
-    /* this should run only if there is one possible move
-function staticEval (pos,maxiPlayer){
-
-    let choice =''
-    if(maxiPlayer == true){
-        choice='x' 
-    } else {choice ='0'}
-    let virtualBoard = gameState;
-    virtualBoard.forEach((ele,ind,arr)=>{
-        if (ele == ''){
-            arr[ind] = choice;
+    function staticEval (pos){
+        let position = pos;
+        if ((position[0] == 'x' && position[0] === position[1] && position[1] === position[2])
+                    || (position[3] == 'x' && position[3] === position[4] && position[4] === position[5])
+                    || (position[6] == 'x' && position[6] === position[7] && position[7] === position[8])
+                    || (position[0] == 'x' && position[0] === position[3] && position[3] === position[6])
+                    || (position[1] == 'x' && position[1] === position[4] && position[4] === position[7])
+                    || (position[2] == 'x' && position[2] === position[5] && position[5] === position[8])
+                    || (position[2] == 'x' && position[2] === position[5] && position[5] === position[8])
+                    || (position[0] == 'x' && position[0] === position[4] && position[4] === position[8])
+                    || (position[2] == 'x' && position[2] === position[4] && position[4] === position[6])) {
+                        return -1
+            } else if ((position[0] == 'x' && position[0] === position[1] && position[1] === position[2])
+                    || (position[3] == 'o' && position[3] === position[4] && position[4] === position[5])
+                    || (position[6] == 'o' && position[6] === position[7] && position[7] === position[8])
+                    || (position[0] == 'o' && position[0] === position[3] && position[3] === position[6])
+                    || (position[1] == 'o' && position[1] === position[4] && position[4] === position[7])
+                    || (position[2] == 'o' && position[2] === position[5] && position[5] === position[8])
+                    || (position[2] == 'o' && position[2] === position[5] && position[5] === position[8])
+                    || (position[0] == 'o' && position[0] === position[4] && position[4] === position[8])
+                    || (position[2] == 'o' && position[2] === position[4] && position[4] === position[6])){
+                        return 1
+                    
+            } else if (position.find(str=>str == '') == undefined) {
+                return 0}
+    }
+    function minimax(pos, depth, maxiPlayer){
+        if (depth == 0 || staticEval(pos) !== undefined) {
+            console.log(staticEval(pos));
+            return staticEval(pos)
+        }
+        let position = pos;
+        if (maxiPlayer == true){
+            let maxEval = -Infinity;
+            for (let i = 0; i < 9; i++){
+                if(position[i] == ''){
+                    let array1 = position
+                    array1[i] = 'o'
+                    let eval = minimax(array1, depth-1, false)
+                    maxEval = Math.max(eval,maxEval);
+                    return maxEval
+                }
+            }
+        } else {
+            let minEval = Infinity;
+            for (let i = 0; i < 9; i++){
+                if(position[i] == ''){
+                    let array1 = position;
+                    array1[i] = 'o';
+                    let eval = minimax(array1, depth-1, false)
+                    maxEval = Math.max(eval,maxEval);
+                    return maxEval
+                }
+            
+                }
         }
     }
-
-}
-
-*/
+    /* */
