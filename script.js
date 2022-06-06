@@ -85,7 +85,7 @@ const board = function(){
 
 const game = function(){
     let gameState = ['','','','','','','','',''];
-    let mode = 'pvp';
+    let mode = '';
     let currentTurn = '';
     const changeTurn = function (){
         if (currentTurn === 'p1'){currentTurn = 'p2' } 
@@ -95,20 +95,35 @@ const game = function(){
         if (this.dataset.xoxo !== '') {return}
         let index = this.dataset.index;
         let choice = '';
-        if (mode == 'vs Player'){
-            if (currentTurn == 'p1') {
-                choice = 'x'
-            } else if (currentTurn == 'p2'){
-                choice = 'o'            
-            }
+        
+        if (currentTurn == 'p1') {
+            choice = 'x'
+        } else if (currentTurn == 'p2'){
+            choice = 'o'            
+        }
+
         if (gameState[index] == 'nil') {
             return
         }
         gameState[index] = choice
-    } else if (mode = 'vs Computer') {
-        aiDecision()
-    }
 
+        changeTurn()
+        board.update(gameState);    
+        board.highlightTurn(currentTurn);
+        if (checkWinCondtion() == 1){
+            return gameOver('x')
+        } else if (checkWinCondtion() == -1){
+            return gameOver('o')
+        } else if (checkWinCondtion() == 0){
+            return gameOver('tie')}
+        if (mode == 'vs Computer') {
+            setTimeout(aiTurn(),1000)
+        }
+
+    }
+    const aiTurn = function(){
+        let index = ai.aiDecision(gameState);
+        gameState[index] = 'o';
         changeTurn()
         board.update(gameState);    
         board.highlightTurn(currentTurn);
@@ -163,6 +178,9 @@ const game = function(){
         if (p2input.value !== '') {
             newPlayer(p2name)
         }
+        if (versusBtn.textContent == 'vs Computer'){
+            newPlayer('TicTacTerminator')
+        }
         game.settings('p1',versusBtn.textContent)
         display.scoreboard();
         const form = document.querySelector('#form').reset();
@@ -178,6 +196,10 @@ const game = function(){
         gameState = ['','','','','','','','',''];
         display.header('New Round','Good Luck!',1.2)
         board.update(gameState);
+        if (mode == 'vs Computer'){
+            currentTurn = 'p1';
+            board.highlightTurn(currentTurn);
+        }
     }
     function checkWinCondtion(){
         for (let i = 0; i < 3; i++){
@@ -206,102 +228,33 @@ const game = function(){
                 }
             }
     }
-    const aiDecision = function(){
-        let index = 0;
-        let choice = 'o';
-        for (let i =0; i<9;i++){
-            if (gameState[i] == ''){
-                let virtualBoard = gameState;
-                virtualBoard[i] = 'o';
-                if (minimax(virtualBoard,5,false) == 1){
-                    index = i;
-                    break
-                }
-            }
-        }
-    }
-    function staticEval (pos){
-        let position = pos;
-        if ((position[0] == 'x' && position[0] === position[1] && position[1] === position[2])
-                    || (position[3] == 'x' && position[3] === position[4] && position[4] === position[5])
-                    || (position[6] == 'x' && position[6] === position[7] && position[7] === position[8])
-                    || (position[0] == 'x' && position[0] === position[3] && position[3] === position[6])
-                    || (position[1] == 'x' && position[1] === position[4] && position[4] === position[7])
-                    || (position[2] == 'x' && position[2] === position[5] && position[5] === position[8])
-                    || (position[2] == 'x' && position[2] === position[5] && position[5] === position[8])
-                    || (position[0] == 'x' && position[0] === position[4] && position[4] === position[8])
-                    || (position[2] == 'x' && position[2] === position[4] && position[4] === position[6])) {
-                        return -1
-            } else if ((position[0] == 'x' && position[0] === position[1] && position[1] === position[2])
-                    || (position[3] == 'o' && position[3] === position[4] && position[4] === position[5])
-                    || (position[6] == 'o' && position[6] === position[7] && position[7] === position[8])
-                    || (position[0] == 'o' && position[0] === position[3] && position[3] === position[6])
-                    || (position[1] == 'o' && position[1] === position[4] && position[4] === position[7])
-                    || (position[2] == 'o' && position[2] === position[5] && position[5] === position[8])
-                    || (position[2] == 'o' && position[2] === position[5] && position[5] === position[8])
-                    || (position[0] == 'o' && position[0] === position[4] && position[4] === position[8])
-                    || (position[2] == 'o' && position[2] === position[4] && position[4] === position[6])){
-                        return 1
-                    
-            } else if (position.find(str=>str == '') == undefined) {
-                return 0}
-    }
-    function minimax(pos, depth, maxiPlayer){
-        if (depth == 0 || staticEval(pos) !== undefined) {
-            console.log(staticEval(pos));
-            return staticEval(pos)
-        }
-        let position = pos;
-        if (maxiPlayer == true){
-            let maxEval = -Infinity;
-            for (let i = 0; i < 9; i++){
-                if(position[i] == ''){
-                    let array1 = position
-                    array1[i] = 'o'
-                    let eval = minimax(array1, depth-1, false)
-                    maxEval = Math.max(eval,maxEval);
-                    return maxEval
-                }
-            }
-        } else {
-            let minEval = Infinity;
-            for (let i = 0; i < 9; i++){
-                if(position[i] == ''){
-                    let array1 = position;
-                    array1[i] = 'o';
-                    let eval = minimax(array1, depth-1, false)
-                    maxEval = Math.max(eval,maxEval);
-                    return maxEval
-                }
-            
-                }
-        }
-    }
-    return {playerDecision, startGame, settings, gameOver, reset,}
+    return {playerDecision, startGame, settings, gameOver, reset,gameState}
 }()
 
 const ai = function (){
 
     const aiDecision = function(board){
-        let wins = [];
-        let draws = [];
+        
+        let bestEval = -Infinity ;
+        let bestMove = 9;
+        if (board[4] == ''){
+            bestMove = 4
+            return bestMove
+        }
+        
+
         for (let i = 0; i < 9; i++){
             if (board[i] == ''){
-                let virtualBoardA = board;
-                virtualBoardA[i] = 'o';
-                if (minimax(virtualBoardA,5,false) == 1){
-                    wins[wins.length] = i;   
-                }
-                if (minimax(virtualBoardA,5,false) == 0){
-                    draws[draws.length] = i;   
+                let virtualBoard = [...board];
+                virtualBoard[i] = 'o';
+                let evaluation = minimax(virtualBoard, 9, true)
+                if (evaluation > bestEval){
+                    bestEval = evaluation;
+                    bestMove = i;
                 }
             }
         }
-        let decision = wins[Math.floor(Math.random() * wins.length)];
-        if (wins.length = 0) {
-            decision = draws[Math.floor(Math.random() * draws.length)]
-        }
-        return decision
+        return bestMove
     }
     function staticEval (pos){
         let position = pos;
@@ -315,7 +268,7 @@ const ai = function (){
                     || (position[0] == 'x' && position[0] === position[4] && position[4] === position[8])
                     || (position[2] == 'x' && position[2] === position[4] && position[4] === position[6])) {
                         return -1
-            } else if ((position[0] == 'x' && position[0] === position[1] && position[1] === position[2])
+            } else if ((position[0] == 'o' && position[0] === position[1] && position[1] === position[2])
                     || (position[3] == 'o' && position[3] === position[4] && position[4] === position[5])
                     || (position[6] == 'o' && position[6] === position[7] && position[7] === position[8])
                     || (position[0] == 'o' && position[0] === position[3] && position[3] === position[6])
@@ -331,7 +284,7 @@ const ai = function (){
     }
     function minimax(pos, depth, maxiPlayer){
         if (depth == 0 || staticEval(pos) !== undefined) {
-            console.log(staticEval(pos));
+            console.log('Eval:' + staticEval(pos) + "   " + depth)
             return staticEval(pos)
         }
         let position = pos;
@@ -339,7 +292,7 @@ const ai = function (){
             let maxEval = -Infinity;
             for (let i = 0; i < 9; i++){
                 if(position[i] == ''){
-                    let array1 = position
+                    let array1 = [...position];
                     array1[i] = 'o'
                     let eval = minimax(array1, depth-1, false)
                     maxEval = Math.max(eval,maxEval);
@@ -350,16 +303,17 @@ const ai = function (){
             let minEval = Infinity;
             for (let i = 0; i < 9; i++){
                 if(position[i] == ''){
-                    let array1 = position;
-                    array1[i] = 'o';
-                    let eval = minimax(array1, depth-1, false)
-                    maxEval = Math.max(eval,maxEval);
-                    return maxEval
+                    let array1 = [...position];
+                    array1[i] = 'x';
+                    let eval = minimax(array1, depth-1, true)
+                    minEval = Math.min(eval,minEval);
+                    return minEval
                 }
             
                 }
         }
     }
+    return {aiDecision,staticEval,minimax}
 }()
 
 function newPlayer (name){
@@ -380,74 +334,10 @@ function toggleNewGame() {
     newGameBtn.addEventListener('click',toggleNewGame);
     resetBtn.addEventListener('click', game.reset);
 
-    /* while testing */
-    p1input.value = 'p1';
-    p2input.value = 'p2';
-    game.startGame();
-    /**/
-
+    /* while testing 
+            p1input.value = 'p1';
+            p2input.value = 'p2';
+            game.startGame();
     /*
-    position = board state
-    depth = how far the algorithm will analyze
-    maximizingPlayer = whose decision is it (boolean value) 
-    alpha = stores highest value for pruning
-    beta = stores value for pruning */
-
-    function staticEval (pos){
-        let position = pos;
-        if ((position[0] == 'x' && position[0] === position[1] && position[1] === position[2])
-                    || (position[3] == 'x' && position[3] === position[4] && position[4] === position[5])
-                    || (position[6] == 'x' && position[6] === position[7] && position[7] === position[8])
-                    || (position[0] == 'x' && position[0] === position[3] && position[3] === position[6])
-                    || (position[1] == 'x' && position[1] === position[4] && position[4] === position[7])
-                    || (position[2] == 'x' && position[2] === position[5] && position[5] === position[8])
-                    || (position[2] == 'x' && position[2] === position[5] && position[5] === position[8])
-                    || (position[0] == 'x' && position[0] === position[4] && position[4] === position[8])
-                    || (position[2] == 'x' && position[2] === position[4] && position[4] === position[6])) {
-                        return -1
-            } else if ((position[0] == 'x' && position[0] === position[1] && position[1] === position[2])
-                    || (position[3] == 'o' && position[3] === position[4] && position[4] === position[5])
-                    || (position[6] == 'o' && position[6] === position[7] && position[7] === position[8])
-                    || (position[0] == 'o' && position[0] === position[3] && position[3] === position[6])
-                    || (position[1] == 'o' && position[1] === position[4] && position[4] === position[7])
-                    || (position[2] == 'o' && position[2] === position[5] && position[5] === position[8])
-                    || (position[2] == 'o' && position[2] === position[5] && position[5] === position[8])
-                    || (position[0] == 'o' && position[0] === position[4] && position[4] === position[8])
-                    || (position[2] == 'o' && position[2] === position[4] && position[4] === position[6])){
-                        return 1
-                    
-            } else if (position.find(str=>str == '') == undefined) {
-                return 0}
-    }
-    function minimax(pos, depth, maxiPlayer){
-        if (depth == 0 || staticEval(pos) !== undefined) {
-            console.log(staticEval(pos));
-            return staticEval(pos)
-        }
-        let position = pos;
-        if (maxiPlayer == true){
-            let maxEval = -Infinity;
-            for (let i = 0; i < 9; i++){
-                if(position[i] == ''){
-                    let array1 = position
-                    array1[i] = 'o'
-                    let eval = minimax(array1, depth-1, false)
-                    maxEval = Math.max(eval,maxEval);
-                    return maxEval
-                }
-            }
-        } else {
-            let minEval = Infinity;
-            for (let i = 0; i < 9; i++){
-                if(position[i] == ''){
-                    let array1 = position;
-                    array1[i] = 'o';
-                    let eval = minimax(array1, depth-1, false)
-                    maxEval = Math.max(eval,maxEval);
-                    return maxEval
-                }
-            
-                }
-        }
-    }
-    /* */
+        
+    */
