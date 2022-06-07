@@ -1,5 +1,3 @@
-
-
 const boardElement = document.querySelector('#board');
 const headerDisplay = document.querySelector('#display');
 const popUp = document.querySelector('#popUpMenu');
@@ -235,59 +233,55 @@ const ai = function (){
 
     const aiDecision = function(board){
         
-        let bestEval = -Infinity ;
-        let bestMove = 9;
-        if (board[4] == ''){
-            bestMove = 4
-            return bestMove
-        }
+        let winMoves = [];
         
 
         for (let i = 0; i < 9; i++){
             if (board[i] == ''){
                 let virtualBoard = [...board];
-                virtualBoard[i] = 'o';
-                let evaluation = minimax(virtualBoard, 9, true)
-                if (evaluation > bestEval){
-                    bestEval = evaluation;
-                    bestMove = i;
+                let evaluation = minimax(virtualBoard, 9, true);
+                if (evaluation > 0){
+                    winMoves.push(i);
                 }
+                
             }
         }
+        let bestMove = winMoves[Math.floor(Math.random * winMoves.length)];
+        console.log(bestMove)
         return bestMove
     }
-    function staticEval (pos){
+    function staticEval (pos,depth){
         let position = pos;
-        if ((position[0] == 'x' && position[0] === position[1] && position[1] === position[2])
-                    || (position[3] == 'x' && position[3] === position[4] && position[4] === position[5])
-                    || (position[6] == 'x' && position[6] === position[7] && position[7] === position[8])
-                    || (position[0] == 'x' && position[0] === position[3] && position[3] === position[6])
-                    || (position[1] == 'x' && position[1] === position[4] && position[4] === position[7])
-                    || (position[2] == 'x' && position[2] === position[5] && position[5] === position[8])
-                    || (position[2] == 'x' && position[2] === position[5] && position[5] === position[8])
-                    || (position[0] == 'x' && position[0] === position[4] && position[4] === position[8])
-                    || (position[2] == 'x' && position[2] === position[4] && position[4] === position[6])) {
-                        return -1
-            } else if ((position[0] == 'o' && position[0] === position[1] && position[1] === position[2])
-                    || (position[3] == 'o' && position[3] === position[4] && position[4] === position[5])
-                    || (position[6] == 'o' && position[6] === position[7] && position[7] === position[8])
-                    || (position[0] == 'o' && position[0] === position[3] && position[3] === position[6])
-                    || (position[1] == 'o' && position[1] === position[4] && position[4] === position[7])
-                    || (position[2] == 'o' && position[2] === position[5] && position[5] === position[8])
-                    || (position[2] == 'o' && position[2] === position[5] && position[5] === position[8])
-                    || (position[0] == 'o' && position[0] === position[4] && position[4] === position[8])
-                    || (position[2] == 'o' && position[2] === position[4] && position[4] === position[6])){
-                        return 1
+        if ((position[0] == 'x' && position[1] == 'x' && position[2] == 'x')
+                    || (position[3] == 'x' && position[4] == 'x' && position[5] == 'x')
+                    || (position[6] == 'x' && position[7] == 'x' && position[8] == 'x')
+                    || (position[0] == 'x' && position[3] == 'x' && position[6] == 'x')
+                    || (position[1] == 'x' && position[4] == 'x' && position[7] == 'x')
+                    || (position[2] == 'x' && position[5] == 'x' && position[8] == 'x')
+                    || (position[0] == 'x' && position[4] == 'x' && position[8] == 'x')
+                    || (position[2] == 'x' && position[4] == 'x' && position[6] == 'x')) {
+                return -(depth + 1)
+            } else if ((position[0] == 'o' && position[1] == 'o' && position[2] == 'o')
+                    || (position[3] == 'o' && position[4] == 'o' && position[5] == 'o')
+                    || (position[6] == 'o' && position[7] == 'o' && position[8] == 'o')
+                    || (position[0] == 'o' && position[3] == 'o' && position[6] == 'o')
+                    || (position[1] == 'o' && position[4] == 'o' && position[7] == 'o')
+                    || (position[2] == 'o' && position[5] == 'o' && position[8] == 'o')
+                    || (position[0] == 'o' && position[4] == 'o' && position[8] == 'o')
+                    || (position[2] == 'o' && position[4] == 'o' && position[6] == 'o')){
+                return (depth + 1)
                     
             } else if (position.find(str=>str == '') == undefined) {
                 return 0}
     }
     function minimax(pos, depth, maxiPlayer){
-        if (depth == 0 || staticEval(pos) !== undefined) {
-            console.log('Eval:' + staticEval(pos) + "   " + depth)
-            return staticEval(pos)
+        if (depth == 0 || staticEval(pos,depth) !== undefined) {
+            if (staticEval(pos,depth) == undefined) {
+                return 0
+            }
+            return staticEval(pos,depth)
         }
-        let position = pos;
+        let position = [...pos];
         if (maxiPlayer == true){
             let maxEval = -Infinity;
             for (let i = 0; i < 9; i++){
