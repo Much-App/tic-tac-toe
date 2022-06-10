@@ -50,7 +50,6 @@ const board = function(){
                 square.classList.add(`${arr[i]}`)}
             square.setAttribute('data-index',`${i}`);
             square.setAttribute('data-xoxo',`${arr[i]}`)
-
             boardElement.appendChild(square);
             square.addEventListener('click',game.playerDecision)
             
@@ -78,6 +77,7 @@ const board = function(){
             p2input.classList.remove('hide');
             return this.textContent = 'vs Player'};
     }
+
     return {update, highlightTurn, changeModeBtn}
 }()
 
@@ -120,8 +120,22 @@ const game = function(){
 
     }
     const aiTurn = function(){
-        let index = ai.aiDecision(gameState);
-        gameState[index] = 'o';
+        let bestMove = -1;
+        let bestEvaluation = -Infinity;
+
+        for (let i = 0; i < 9; i++){
+            if (gameState[i] == ''){
+                let virtualBoard = [...gameState];
+                virtualBoard[i] = 'o';
+                let evaluation = ai.minimax(virtualBoard, 6, false);
+                console.log(evaluation, " + ", i)
+                if (evaluation > bestEvaluation){
+                    bestEvaluation = evaluation;
+                    bestMove = i;
+                }
+            }
+        }
+        gameState[bestMove] = 'o';
         changeTurn()
         board.update(gameState);    
         board.highlightTurn(currentTurn);
@@ -250,7 +264,7 @@ const ai = function (){
         console.log(bestMove)
         return bestMove
     }
-    function staticEval (pos,depth){
+    function staticEval (pos){
         let position = pos;
         if ((position[0] == 'x' && position[1] == 'x' && position[2] == 'x')
                     || (position[3] == 'x' && position[4] == 'x' && position[5] == 'x')
@@ -260,7 +274,7 @@ const ai = function (){
                     || (position[2] == 'x' && position[5] == 'x' && position[8] == 'x')
                     || (position[0] == 'x' && position[4] == 'x' && position[8] == 'x')
                     || (position[2] == 'x' && position[4] == 'x' && position[6] == 'x')) {
-                return -(depth + 1)
+                return -10
             } else if ((position[0] == 'o' && position[1] == 'o' && position[2] == 'o')
                     || (position[3] == 'o' && position[4] == 'o' && position[5] == 'o')
                     || (position[6] == 'o' && position[7] == 'o' && position[8] == 'o')
@@ -269,17 +283,18 @@ const ai = function (){
                     || (position[2] == 'o' && position[5] == 'o' && position[8] == 'o')
                     || (position[0] == 'o' && position[4] == 'o' && position[8] == 'o')
                     || (position[2] == 'o' && position[4] == 'o' && position[6] == 'o')){
-                return (depth + 1)
+                return 10
                     
             } else if (position.find(str=>str == '') == undefined) {
                 return 0}
     }
     function minimax(pos, depth, maxiPlayer){
-        if (depth == 0 || staticEval(pos,depth) !== undefined) {
-            if (staticEval(pos,depth) == undefined) {
+        if (depth == 0 || staticEval(pos) !== undefined) {
+            if (staticEval(pos) == undefined) {
                 return 0
             }
-            return staticEval(pos,depth)
+            let evalScore = staticEval(pos) + depth;
+            return evalScore
         }
         let position = [...pos];
         if (maxiPlayer == true){
@@ -290,9 +305,10 @@ const ai = function (){
                     array1[i] = 'o'
                     let eval = minimax(array1, depth-1, false)
                     maxEval = Math.max(eval,maxEval);
-                    return maxEval
+                    
                 }
             }
+            return maxEval
         } else {
             let minEval = Infinity;
             for (let i = 0; i < 9; i++){
@@ -301,10 +317,11 @@ const ai = function (){
                     array1[i] = 'x';
                     let eval = minimax(array1, depth-1, true)
                     minEval = Math.min(eval,minEval);
-                    return minEval
+                    
                 }
             
                 }
+                return minEval
         }
     }
     return {aiDecision,staticEval,minimax}

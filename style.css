@@ -71,10 +71,10 @@ body {
 	background-color: white;
 }
 .square.x {
-	background-image: url(x.svg);
+	background-image: url(media/x.svg);
 }
 .square.o {
-	background-image: url(o.svg);
+	background-image: url(media/o.svg);
 }
 button {
 	width: calc(5px + 9.5vw);
